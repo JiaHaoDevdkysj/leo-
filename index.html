@@ -140,7 +140,7 @@
     <header id="mainTitle">LEO</header>
     <h2>心怀热<span id="love-char">爱</span>，才能走得更远</h2>
     <p>每一行代码，都是向梦想迈进的一步。</p>
-    <a href="https://wwam.lanzn.com/b00zxzu2eb" class="btn btn-software" target="_blank">📦 我的软件</a>
+    <a href="#" id="software-btn" class="btn btn-software" target="_blank">📦 我的软件</a>
     <a href="https://jiahaodevdkysj.github.io/" class="btn btn-author" target="_blank">👤 作者账号</a>
     <div class="dynamic-texts-container" id="dynamicTextsContainer"></div>
   </div>
@@ -148,9 +148,9 @@
     const title = document.getElementById("mainTitle");
     const star = document.getElementById("star");
     const loveChar = document.getElementById("love-char");
+    const softwareBtn = document.getElementById("software-btn");
     const dynamicTextsContainer = document.getElementById("dynamicTextsContainer");
     
-    // 新增：独立的点击计数器
     let starClickCount = 0;
     let loveCharClickCount = 0;
 
@@ -201,9 +201,7 @@
     });
 
     star.addEventListener("click", () => {
-        // 星星的计数器
         starClickCount++;
-        // 只有当计数器大于1时，才执行正常逻辑
         if (starClickCount > 1) {
             const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
             createNewTextItem(randomQuote);
@@ -211,12 +209,20 @@
     });
 
     loveChar.addEventListener("click", () => {
-        // “爱”字的计数器
         loveCharClickCount++;
-        // 只有当计数器大于1时，才执行正常逻辑
         if (loveCharClickCount > 1) {
             createNewTextItem("离婚了吧");
         }
+    });
+
+    // 为“我的软件”按钮添加点击事件
+    softwareBtn.addEventListener("click", (event) => {
+        event.preventDefault(); // 阻止默认的跳转行为
+        createNewTextItem("密码是1234"); // 先弹出密码
+        // 3秒后跳转链接
+        setTimeout(() => {
+            window.open("https://wwam.lanzn.com/b00zxzu2eb", "_blank");
+        }, 3000); // 3000毫秒 = 3秒
     });
   </script>
 </body>
