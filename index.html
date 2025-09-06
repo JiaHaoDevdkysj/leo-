@@ -178,7 +178,7 @@
         "💌 梦想，从这里启航"
     ];
 
-    function createNewTextItem(text) {
+    function createNewTextItem(text, duration = 1000) {
       const newTextDiv = document.createElement("div");
       newTextDiv.className = "dynamic-text-item";
       newTextDiv.textContent = text;
@@ -191,7 +191,7 @@
         newTextDiv.addEventListener('transitionend', () => {
             newTextDiv.remove();
         }, { once: true });
-      }, 1000);
+      }, duration);
     }
     
     title.addEventListener("click", () => {
@@ -210,19 +210,16 @@
 
     loveChar.addEventListener("click", () => {
         loveCharClickCount++;
-        if (loveCharClickCount > 1) {
+        // 已修改：将条件从 > 1 变为 > 2，实现点击三次才触发
+        if (loveCharClickCount > 2) {
             createNewTextItem("离婚了吧");
         }
     });
 
-    // 为“我的软件”按钮添加点击事件
     softwareBtn.addEventListener("click", (event) => {
-        event.preventDefault(); // 阻止默认的跳转行为
-        createNewTextItem("密码是1234"); // 先弹出密码
-        // 3秒后跳转链接
-        setTimeout(() => {
-            window.open("https://wwam.lanzn.com/b00zxzu2eb", "_blank");
-        }, 3000); // 3000毫秒 = 3秒
+        event.preventDefault();
+        createNewTextItem("密码是1234", 3000); 
+        window.open("https://wwam.lanzn.com/b00zxzu2eb", "_blank");
     });
   </script>
 </body>
