@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LEO的主页</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .card {
+      position: relative;
+      background: white;
+      width: 95%;
+      height: 95%;
+      box-sizing: border-box;
+      padding: 40px 20px;
+      border-radius: 20px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      min-height: 50%;
+    }
+    header {
+      font-size: 64px;
+      font-weight: bold;
+      margin-bottom: 40px;
+      padding: 20px 50px;
+      color: #1E90FF;
+      border: 4px solid #1E90FF;
+      border-radius: 16px;
+      background: #f0f8ff;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    h2 {
+      margin: 20px 0 15px;
+      font-size: 32px;
+      font-weight: bold;
+    }
+    .love-char {
+      color: #E74C3C;
+      cursor: pointer;
+    }
+    p {
+      font-size: 22px;
+      margin: 10px 0 20px;
+      color: #444;
+    }
+    .btn {
+      display: block;
+      width: 80%;
+      margin: 18px auto;
+      padding: 18px;
+      color: white;
+      border-radius: 14px;
+      text-decoration: none;
+      font-size: 20px;
+      font-weight: bold;
+      transition: 0.2s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .btn-software {
+      background: #4CAF50;
+    }
+    .btn-software:hover {
+      background: #45a049;
+    }
+    .btn-author {
+      background: #2196F3;
+    }
+    .btn-author:hover {
+      background: #1976D2;
+    }
+    .star {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 28px;
+      cursor: pointer;
+    }
+    .dynamic-texts-container {
+      margin-top: 30px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .dynamic-text-item {
+      font-size: 18px;
+      color: #666;
+      margin-bottom: 5px;
+      opacity: 0;
+      transition: opacity 0.2s ease-out;
+    }
+    .dynamic-text-item.show {
+        opacity: 1;
+    }
+    @media (max-width: 768px) {
+        header {
+            font-size: 10vw;
+            padding: 15px 30px;
+        }
+        h2 {
+            font-size: 6vw;
+        }
+        .love-char {
+            font-size: 6vw;
+        }
+        p {
+            font-size: 4vw;
+        }
+        .btn {
+            font-size: 4.5vw;
+            padding: 15px;
+        }
+        .dynamic-text-item {
+            font-size: 3.5vw;
+        }
+        .card {
+            padding: 20px 10px;
+        }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="star" id="star">⭐</div>
+    <header id="mainTitle">LEO</header>
+    <h2>心怀热<span id="love-char">爱</span>，才能走得更远</h2>
+    <p>每一行代码，都是向梦想迈进的一步。</p>
+    <a href="https://example.com" class="btn btn-software" target="_blank">📦 我的软件</a>
+    <a href="https://jiahaodevdkysj.github.io/" class="btn btn-author" target="_blank">👤 作者账号</a>
+    <div class="dynamic-texts-container" id="dynamicTextsContainer"></div>
+  </div>
+  <script>
+    const title = document.getElementById("mainTitle");
+    const star = document.getElementById("star");
+    const loveChar = document.getElementById("love-char");
+    const dynamicTextsContainer = document.getElementById("dynamicTextsContainer");
+    
+    // 新增：独立的点击计数器
+    let starClickCount = 0;
+    let loveCharClickCount = 0;
+
+    const colors = ["#e74c3c", "#27ae60", "#2980b9", "#8e44ad", "#f39c12", "#d35400"];
+    const quotes = [
+        "🌟 星光不问赶路人",
+        "💡 追光而遇，沐光而行",
+        "🚀 梦想起航，永不言弃",
+        "💖 热爱可抵岁月漫长",
+        "✨ 生活要有光",
+        "🌈 未来可期",
+        "🎉 前程似锦，金榜题名",
+        "💪 中考加油，无所畏惧",
+        "🍀 逢考必过，旗开得胜",
+        "📖 笔下生花，妙笔生辉",
+        "💡 智者不惑，勇者不惧",
+        "☀️ 你的努力，终将闪光",
+        "🌻 愿你走出半生，归来仍是少年",
+        "🍃 乘风破浪，未来可期",
+        "💫 少年自有凌云志，不负光阴不负己",
+        "🏆 奋斗的青春最美丽",
+        "💯 每一份付出，都将开花结果",
+        "🧡 心之所向，素履以往",
+        "🌠 愿你的世界，晴空万里",
+        "💌 梦想，从这里启航"
+    ];
+
+    function createNewTextItem(text) {
+      const newTextDiv = document.createElement("div");
+      newTextDiv.className = "dynamic-text-item";
+      newTextDiv.textContent = text;
+      dynamicTextsContainer.appendChild(newTextDiv);
+      setTimeout(() => {
+        newTextDiv.classList.add('show');
+      }, 10);
+      setTimeout(() => {
+        newTextDiv.classList.remove('show');
+        newTextDiv.addEventListener('transitionend', () => {
+            newTextDiv.remove();
+        }, { once: true });
+      }, 1000);
+    }
+    
+    title.addEventListener("click", () => {
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      title.style.color = randomColor;
+      title.style.borderColor = randomColor;
+    });
+
+    star.addEventListener("click", () => {
+        // 星星的计数器
+        starClickCount++;
+        // 只有当计数器大于1时，才执行正常逻辑
+        if (starClickCount > 1) {
+            const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+            createNewTextItem(randomQuote);
+        }
+    });
+
+    loveChar.addEventListener("click", () => {
+        // “爱”字的计数器
+        loveCharClickCount++;
+        // 只有当计数器大于1时，才执行正常逻辑
+        if (loveCharClickCount > 1) {
+            createNewTextItem("离婚了吧");
+        }
+    });
+  </script>
+</body>
+</html>
