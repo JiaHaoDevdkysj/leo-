@@ -15,7 +15,15 @@
       justify-content: center;
       align-items: center;
       overflow: hidden;
+      /* 核心修改：让body可以进行缩放，并设置平滑过渡 */
+      transform: scale(1);
+      transition: transform 1.5s ease-in-out;
     }
+    /* 缩小效果的CSS类 */
+    body.shrink-animate {
+      transform: scale(0.01);
+    }
+
     .card {
       position: relative;
       background: white;
@@ -32,6 +40,7 @@
       text-align: center;
       min-height: 50%;
     }
+
     header {
       font-size: 64px;
       font-weight: bold;
@@ -43,8 +52,24 @@
       background: #f0f8ff;
       box-shadow: 0 3px 8px rgba(0,0,0,0.15);
       cursor: pointer;
-      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      transition: color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     }
+
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    .shimmer-active {
+        background: linear-gradient(to right, #f0f8ff 0%, #ffffff 50%, #f0f8ff 100%);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: shimmer 1s linear infinite;
+    }
+    
     h2 {
       margin: 20px 0 15px;
       font-size: 32px;
@@ -52,6 +77,11 @@
     }
     .love-char {
       color: #E74C3C;
+      cursor: pointer;
+    }
+    /* 为“远”字添加独特的样式 */
+    .far-char { 
+      color: #3498DB;
       cursor: pointer;
     }
     p {
@@ -118,7 +148,6 @@
         opacity: 1;
     }
 
-    /* 弹窗及背景遮罩样式 */
     .popup-overlay {
         position: fixed;
         top: 0;
@@ -160,14 +189,13 @@
         font-weight: bold;
         margin-bottom: 15px;
         color: #333;
-        display: inline-block; /* 让标题和图标在同一行 */
+        display: inline-block;
         margin-right: 10px;
     }
-    /* 聊天图标样式 */
     .chat-icon {
         font-size: 24px;
         cursor: pointer;
-        display: none; /* 默认隐藏 */
+        display: none;
         color: #007bff;
         vertical-align: top;
     }
@@ -176,8 +204,6 @@
         line-height: 1.6;
         color: #555;
     }
-
-    /* 聊天弹窗样式 */
     .chat-popup-content {
       width: 300px;
       padding: 20px;
@@ -278,7 +304,7 @@
     <div class="announcement-icon" id="announcement-icon">📢</div>
     <div class="star" id="star">⭐</div>
     <header id="mainTitle">LEO</header>
-    <h2>心怀热<span id="love-char">爱</span>，才能走得更远</h2>
+    <h2>心怀热<span id="love-char">爱</span>，才能走得更<span id="far-char">远</span></h2>
     <p>每一行代码，都是向梦想迈进的一步。</p>
     <a href="#" id="software-btn" class="btn btn-software" target="_blank">📦 我的软件</a>
     <a href="https://jiahaodevdkysj.github.io/" class="btn btn-author" target="_blank">👤 作者账号</a>
@@ -313,13 +339,13 @@
   </div>
 
   <script>
+    const body = document.body;
     const title = document.getElementById("mainTitle");
+    const farChar = document.getElementById("far-char");
     const star = document.getElementById("star");
     const loveChar = document.getElementById("love-char");
     const softwareBtn = document.getElementById("software-btn");
     const dynamicTextsContainer = document.getElementById("dynamicTextsContainer");
-
-    // 新增元素
     const announcementIcon = document.getElementById("announcement-icon");
     const announcementPopup = document.getElementById("announcement-popup");
     const announcementPopupCloseBtn = document.getElementById("announcement-popup-close");
@@ -331,10 +357,11 @@
     const sendButton = document.getElementById("send-button");
     const chatMessages = document.getElementById("chat-messages");
     
-    // 独立计数器
     let starClickCount = 0;
     let loveCharClickCount = 0;
-    let announcementClickCount = 0; // 新增公告标题点击计数器
+    let announcementClickCount = 0;
+    let isTitleAnimating = false;
+    let currentShrinkTimeout;
 
     const colors = ["#e74c3c", "#27ae60", "#2980b9", "#8e44ad", "#f39c12", "#d35400"];
     const quotes = [
@@ -381,14 +408,37 @@
         messageDiv.className = `chat-message ${isUser ? 'user-message' : 'bot-message'}`;
         messageDiv.textContent = text;
         chatMessages.appendChild(messageDiv);
-        // 自动滚动到底部
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
     
     title.addEventListener("click", () => {
       const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      
+      title.classList.remove('shimmer-active');
       title.style.color = randomColor;
       title.style.borderColor = randomColor;
+      
+      title.classList.add('shimmer-active');
+      setTimeout(() => {
+          title.classList.remove('shimmer-active');
+      }, 1000);
+    });
+
+    // 监听“远”字的双击事件，而不是大标题
+    farChar.addEventListener("dblclick", () => {
+      if (isTitleAnimating) {
+        return;
+      }
+      isTitleAnimating = true;
+
+      clearTimeout(currentShrinkTimeout);
+      
+      body.classList.add('shrink-animate');
+
+      currentShrinkTimeout = setTimeout(() => {
+        body.classList.remove('shrink-animate');
+        isTitleAnimating = false;
+      }, 1500);
     });
 
     star.addEventListener("click", () => {
@@ -412,12 +462,10 @@
         window.open("https://wwam.lanzn.com/b00zxzu2eb", "_blank");
     });
 
-    // 公告图标点击事件：显示弹窗
     announcementIcon.addEventListener("click", () => {
         announcementPopup.classList.add("show");
     });
 
-    // 公告弹窗关闭事件：隐藏弹窗
     announcementPopupCloseBtn.addEventListener("click", () => {
         announcementPopup.classList.remove("show");
     });
@@ -427,22 +475,19 @@
         }
     });
 
-    // 公告标题点击事件：计数
     announcementTitle.addEventListener("click", () => {
         announcementClickCount++;
         if (announcementClickCount === 10) {
-            chatIcon.style.display = 'inline-block'; // 达到10次后显示图标
-            announcementPopup.classList.remove('show'); // 自动关闭公告弹窗
+            chatIcon.style.display = 'inline-block';
+            announcementPopup.classList.remove('show');
         }
     });
 
-    // 彩蛋对话图标点击事件：显示对话弹窗
     chatIcon.addEventListener("click", () => {
         chatPopup.classList.add("show");
         addMessage("你好，我是彩蛋机器人。请输入暗号。", false);
     });
 
-    // 对话弹窗关闭事件
     chatPopupCloseBtn.addEventListener("click", () => {
         chatPopup.classList.remove("show");
     });
@@ -452,38 +497,28 @@
         }
     });
 
-    // 发送按钮点击事件
-        sendButton.addEventListener("click", () => {
+    sendButton.addEventListener("click", () => {
         const userInput = messageInput.value.trim();
         if (userInput !== "") {
-            addMessage(userInput, true); // 显示用户输入
-            let botResponse = "没有此彩蛋"; // 默认回答
+            addMessage(userInput, true);
+            let botResponse = "没有此彩蛋";
 
-            if (userInput === "你好哦") {
-                botResponse = "我好你妈";
-            } 
-            // 在这里添加新的彩蛋
-            else if (userInput === "你好") {
+            if (userInput === "123") {
+                botResponse = "你26";
+            } else if (userInput === "222") {
+                botResponse = "没有此彩蛋";
+            } else if (userInput === "你好") {
                 botResponse = "很高兴见到你！";
             }
-              else if (userInput === "结婚") {
-                botResponse = "程子涵和雷韵萌结婚了吧，离那么近";
-            }
-            else if (userInput === "离婚") {
-                botResponse = "程子涵和雷韵萌离婚了吧？离那么远";
-            }
 
-            // 在短暂延迟后显示机器人回答
             setTimeout(() => {
                 addMessage(botResponse, false);
             }, 500);
 
-            messageInput.value = ""; // 清空输入框
+            messageInput.value = "";
         }
     });
 
-
-    // 监听回车键
     messageInput.addEventListener("keypress", (event) => {
         if (event.key === "Enter") {
             sendButton.click();
@@ -492,4 +527,3 @@
   </script>
 </body>
 </html>
-
